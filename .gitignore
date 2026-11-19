@@ -1,0 +1,11 @@
+# Large art kept only on this computer (too big for GitHub)
+assets/old/
+assets/source/
+
+# Local tooling (test helpers, preview server config)
+.claude/
+
+# OS clutter
+Thumbs.db
+Desktop.ini
+.DS_Store
