@@ -169,7 +169,7 @@ G.MAPS.ruins = () => ({
   battles: 'ruins',
   tint: () => (G.flag('morvane_defeated') ? '#d6d0d4' : '#9ea4c0'),
   particles: 'ash',
-  walk: [[52, 200, 588, 130], [200, 100, 260, 100], [68, 120, 122, 80], [470, 120, 122, 80], [326, 300, 34, 84],
+  walk: [[52, 200, 588, 130], [200, 100, 260, 100], [68, 120, 122, 80], [470, 120, 146, 80], [326, 300, 34, 84],
     [186, 172, 18, 28], [456, 176, 24, 24]],   // the open gaps in each side room's inner wall
   blocks: [
     [52, 200, 63, 62], [160, 200, 46, 62], [480, 192, 20, 70], [575, 200, 60, 62],            // room walls
@@ -177,7 +177,7 @@ G.MAPS.ruins = () => ({
     [275, 245, 16, 22], [395, 205, 16, 56], [440, 240, 30, 26], [215, 230, 45, 35], [300, 225, 40, 20],   // pillars, rubble
     [268, 98, 22, 28], [403, 98, 20, 26], [240, 96, 50, 14], [384, 96, 66, 14],              // braziers, towers
     [124, 105, 22, 40], [75, 135, 40, 30], [75, 165, 22, 28],                                 // west room
-    [520, 105, 18, 40], [505, 130, 28, 18], [540, 158, 32, 22], [590, 165, 22, 30],          // east room
+    [546, 108, 20, 38], [516, 160, 30, 26], [590, 165, 22, 30],                               // east room: lever, rubble pile (left), brazier
     [476, 108, 22, 68],                                                                       // east room's inner wall above its gap
     [332, 108, 24, 24],                                                                       // crystal pedestal
   ],
@@ -188,7 +188,7 @@ G.MAPS.ruins = () => ({
   safe: (x, y) => y < 140 || y > 340,
   objects: [
     { x: 122, y: 103, w: 26, h: 44, onTalk: () => G.runScene('Lever_West') },
-    { x: 518, y: 103, w: 22, h: 44, onTalk: () => G.runScene('Lever_East') },
+    { x: 544, y: 104, w: 26, h: 44, onTalk: () => G.runScene('Lever_East') },
     chest('ruins_phoenix', 165, 125, 20, 25, { item: 'Phoenix Feather' }),
     chest('ruins_hipotion', 588, 125, 22, 25, { item: 'Hi-Potion' }),
     chest('ruins_ether', 545, 215, 20, 20, { item: 'Ether' }),

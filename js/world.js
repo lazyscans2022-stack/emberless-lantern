@@ -152,7 +152,8 @@ G.world = (() => {
       act(async () => { if (n.onTalk) await n.onTalk(); else await G.runScene(n.scene, { only: n.only }); n.idleT = 2; });
       return;
     }
-    const o = (map.objects || []).find((ob) => ob.onTalk && shown(ob) && inRect(fx, fy, { x: ob.x - 3, y: ob.y - 3, w: ob.w + 6, h: ob.h + 6 }));
+    // a little slack around each object, so you don't have to line up to the exact pixel
+    const o = (map.objects || []).find((ob) => ob.onTalk && shown(ob) && inRect(fx, fy, { x: ob.x - 7, y: ob.y - 6, w: ob.w + 14, h: ob.h + 12 }));
     if (o) act(o.onTalk);
   }
 
@@ -269,10 +270,12 @@ G.world = (() => {
     if (!s) return;
     const col = e.moving ? WALK_COLS[Math.floor(e.anim || 0) % 4] : 1;
     const row = ROW[e.dir] ?? 0;
-    // soft shadow
-    ctx.fillStyle = 'rgba(0,0,0,0.28)';
-    ctx.beginPath(); ctx.ellipse(Math.round(e.x), Math.round(e.y) - 1, s.fw * 0.32, 2.2, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.drawImage(s.img, col * s.fw, row * s.fh, s.fw, s.fh, Math.round(e.x - s.fw / 2), Math.round(e.y - s.fh + 1), s.fw, s.fh);
+    // sheets hold extra detail; draw them back at game size (positions snap to the finer canvas grid)
+    const k = 1 / (G.ART.spriteDetail || 1), w = s.fw * k, h = s.fh * k;
+    const snap = (v) => Math.round(v * (G.ART.canvasDetail || 1)) / (G.ART.canvasDetail || 1);
+    ctx.fillStyle = 'rgba(0,0,0,0.28)';   // soft shadow
+    ctx.beginPath(); ctx.ellipse(snap(e.x), snap(e.y) - 1, w * 0.32, 2.2, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.drawImage(s.img, col * s.fw, row * s.fh, s.fw, s.fh, snap(e.x - w / 2), snap(e.y - h + 1), w, h);
   }
   function mapImage() {
     const src = map.imageLit && map.imageLit.when() ? map.imageLit.src : map.image;

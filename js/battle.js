@@ -67,7 +67,7 @@ G.battle = (() => {
     if (c.side === 'party') {
       const s = G.world.sheet(c.look.toLowerCase());
       // left-facing frame from the 3x4 sheet (row 1); a stepping frame while lunging
-      if (s) return { img: s.img, sx: (c.lunge > 0 ? 0 : 1) * s.fw, sy: s.fh, sw: s.fw, sh: s.fh, scale: PARTY_SCALE, width: s.fw, height: s.fh };
+      if (s) return { img: s.img, sx: (c.lunge > 0 ? 0 : 1) * s.fw, sy: s.fh, sw: s.fw, sh: s.fh, scale: PARTY_SCALE / (G.ART.spriteDetail || 1), width: s.fw, height: s.fh };
       return { img: G.art.person(c.look, 'left', c.lunge > 0 ? 1 : 0), scale: 2 };
     }
     const art = G.ART.enemies[c.sprite] && G.img.get(G.ART.enemies[c.sprite]);

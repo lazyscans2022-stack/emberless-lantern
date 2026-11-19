@@ -9,10 +9,18 @@
     G.art.drawPortrait(c, key);
     return c;
   }
+  // Face from the pixel portraits; falls back to the small code-drawn portrait if the file is missing.
+  function face(look, cls = 'face') {
+    const img = G.el('img', cls);
+    img.alt = '';
+    img.src = G.ART.face(look.toLowerCase());
+    img.onerror = () => img.replaceWith(portrait(look));
+    return img;
+  }
   function partyCard(m) {
     const s = G.stats(m), def = G.CHARS[m.id];
     const card = G.el('div', 'card');
-    card.appendChild(portrait(def.look));
+    card.appendChild(face(def.look));
     card.insertAdjacentHTML('beforeend', `
       <div><b>${def.name}</b> <span class="desc">Lv ${m.level} ${def.cls}</span></div>
       <div><div class="desc">HP ${m.hp}/${s.maxHp}</div><div class="bar"><i style="width:${(100 * m.hp) / s.maxHp}%"></i></div></div>
@@ -195,6 +203,7 @@
       const skills = G.knownSkills(m).map((id) => `<div><b>${G.SKILLS[id].name}</b> <span class="goldtxt">${G.SKILLS[id].mp} MP</span><br><span class="desc">${G.SKILLS[id].desc}</span></div>`).join('');
       const next = m.level >= G.LEVEL_CAP ? 'MAX' : G.expToNext(m.level) - m.exp;
       const p = ui.panel({ x: 112, y: 6, w: 202, h: 228, html: `
+        <div class="status-face"></div>
         <h3>${def.name} · ${def.cls}</h3>
         <div class="statgrid">
           <span>Level</span><span>${m.level}</span><span>EXP to next</span><span>${next}</span>
@@ -204,6 +213,7 @@
         <div class="desc" style="margin:.4em 0">${['weapon', 'armor', 'accessory'].map((k) => m.equip[k] || '—').join(' · ')}</div>
         <h3>Skills</h3>${skills}` });
       p.style.overflowY = 'auto';
+      p.querySelector('.status-face').appendChild(face(def.look, 'face big'));
       await new Promise((r) => { const h = G.input.push((a) => { if (a === 'ok' || a === 'cancel') { G.input.pop(h); r(); } }); });
       p.remove();
     }

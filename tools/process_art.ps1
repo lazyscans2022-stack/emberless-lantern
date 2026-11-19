@@ -157,11 +157,12 @@ function Frame-Portrait($path, $name) {
   # full width of the figure inside the crop rows (columns with a few solid pixels, ignores stray specks)
   $span = $img.ColumnSpan($top, $top + $ch, 6)
   $x0 = [math]::Max(0, $span[0] - $SIDE_PAD); $x1 = [math]::Min($W - 1, $span[1] + $SIDE_PAD)
-  $img.Crop($x0, $top, $x1 - $x0 + 1, $ch)
+  $headCx = $img.Run($headTop + [int]($H * 0.06), [int]$cx, 6)[1]   # centre of the head itself
+  @{ img = $img.Crop($x0, $top, $x1 - $x0 + 1, $ch); hx = $headCx - $x0; hy = $headTop - $top }
 }
 if ($Only -contains 'portraits') {   # painted portraits (kept as a backup set; the game uses portraits_pixel)
   foreach ($name in $CAST) {
-    $crop = Frame-Portrait "$Src\portraits\$name.png" $name
+    $crop = (Frame-Portrait "$Src\portraits\$name.png" $name).img
     $outW = [int]([math]::Round($crop.W * $P_H / $crop.H))
     $crop.SmoothResize($outW, $P_H).Save("$Out\portraits\$name.png")
     "portrait    $name  ${outW}x$P_H"
@@ -170,14 +171,22 @@ if ($Only -contains 'portraits') {   # painted portraits (kept as a backup set; 
 # Pixel portraits (used in game): same framing, then snapped to a real pixel grid at game size.
 $PP_H = 240   # image pixels tall; shown 120 game px tall above the dialogue box (double detail)
 $PP_COLORS = 72
+$FACE_SRC = 820   # source pixels covered by the menu face crop (one whole head, hair to chin)
+$FACE_PX = 64     # face image size
 if ($Only -contains 'portraits_pixel') {
   foreach ($name in $CAST) {
-    $crop = Frame-Portrait "$Src\portraits_pixel\${name}_pixel.png" $name
+    $fr = Frame-Portrait "$Src\portraits_pixel\${name}_pixel.png" $name
+    $crop = $fr.img
     $outW = [int]([math]::Round($crop.W * $PP_H / $crop.H))
     $o = $crop.BoxResize($outW, $PP_H)
     [void]$o.Quantize($PP_COLORS, $true)
     $o.Save("$Out\portraits_pixel\${name}_pixel.png")
-    "pixel port  ${name}_pixel  ${outW}x$PP_H"
+    # face crop for menus: a square around the head, from just above the hair to the chin
+    $fs = $FACE_SRC
+    $face = $crop.Crop([int]($fr.hx - $fs / 2), [int]($fr.hy - $fs * 0.03), $fs, $fs).BoxResize($FACE_PX, $FACE_PX)
+    [void]$face.Quantize($PP_COLORS, $true)
+    $face.Save("$Out\portraits_pixel\${name}_face.png")
+    "pixel port  ${name}_pixel  ${outW}x$PP_H  (+ face ${FACE_PX}px)"
   }
 }
 
@@ -196,32 +205,37 @@ $SPRITES = [ordered]@{
   pip     = @{ h = 25; side = 'left' }
   tilly   = @{ h = 22; side = 'right' }
 }
+# Sheets are built at $SPRITE_DETAIL times the in-game size (the game draws them back at normal size on
+# a finer canvas), so every walking-frame movement is scaled by the same factor ($K).
+$SPRITE_DETAIL = 2
+$K = $SPRITE_DETAIL
 function Front-Step($p, [bool]$liftLeft) {
   $f = $p.Copy(); $legTop = [int]($p.H * 0.68)
-  $f.Bob($legTop)
+  for ($i = 0; $i -lt $K; $i++) { $f.Bob($legTop) }        # one game-pixel bob
   $sp = $p.ColumnSpan($legTop, $p.H, 1); $cx = [int](($sp[0] + $sp[1]) / 2)
-  if ($liftLeft) { $f.ShiftRegion($sp[0], $legTop, $cx - $sp[0], $p.H - $legTop, 0, -1) }
-  else { $f.ShiftRegion($cx, $legTop, $sp[1] - $cx + 1, $p.H - $legTop, 0, -1) }
+  if ($liftLeft) { $f.ShiftRegion($sp[0], $legTop, $cx - $sp[0], $p.H - $legTop, 0, -$K) }
+  else { $f.ShiftRegion($cx, $legTop, $sp[1] - $cx + 1, $p.H - $legTop, 0, -$K) }
   # arms swing against the legs
   $a0 = [int]($p.H * 0.36); $asp = $p.ColumnSpan($a0, $legTop, 1); $aw = [math]::Max(2, [int](($asp[1] - $asp[0]) * 0.2))
-  $f.ShiftRegion($asp[0], $a0 - 1, $aw, $legTop - $a0, 0, $(if ($liftLeft) { 1 } else { -1 }), $false)
-  $f.ShiftRegion($asp[1] - $aw + 1, $a0 - 1, $aw, $legTop - $a0, 0, $(if ($liftLeft) { -1 } else { 1 }), $false)
+  $f.ShiftRegion($asp[0], $a0 - $K, $aw, $legTop - $a0, 0, $(if ($liftLeft) { $K } else { -$K }), $false)
+  $f.ShiftRegion($asp[1] - $aw + 1, $a0 - $K, $aw, $legTop - $a0, 0, $(if ($liftLeft) { -$K } else { $K }), $false)
   $f
 }
 function Side-Step($p, [bool]$facingRight, [bool]$liftFront) {
   $f = $p.Copy(); $legTop = [int]($p.H * 0.66)
-  $f.Bob($legTop)
+  for ($i = 0; $i -lt $K; $i++) { $f.Bob($legTop) }
   $sp = $p.ColumnSpan($legTop, $p.H, 1); $cx = [int](($sp[0] + $sp[1]) / 2)
-  $dir = $(if ($facingRight) { 1 } else { -1 })
+  $dir = $(if ($facingRight) { $K } else { -$K })
   # stride: the front leg reaches forward, the back leg pushes back (pasted over, so no gaps)
   if ($facingRight) { $bx = $sp[0]; $bw = $cx - $sp[0]; $fx = $cx; $fw = $sp[1] - $cx + 1 } else { $fx = $sp[0]; $fw = $cx - $sp[0]; $bx = $cx; $bw = $sp[1] - $cx + 1 }
   $f.ShiftRegion($fx, $legTop, $fw, $p.H - $legTop, $dir, 0, $false)
   $f.ShiftRegion($bx, $legTop, $bw, $p.H - $legTop, -$dir, 0, $false)
   # one foot lifts off the ground, alternating between the two frames
-  if ($liftFront) { $f.ShiftRegion($fx + $dir, $p.H - 3, $fw, 3, 0, -1) } else { $f.ShiftRegion($bx - $dir, $p.H - 3, $bw, 3, 0, -1) }
+  $foot = 3 * $K
+  if ($liftFront) { $f.ShiftRegion($fx + $dir, $p.H - $foot, $fw, $foot, 0, -$K) } else { $f.ShiftRegion($bx - $dir, $p.H - $foot, $bw, $foot, 0, -$K) }
   # the arm swings against the lifted leg
   $a0 = [int]($p.H * 0.38); $asp = $p.ColumnSpan($a0, $legTop, 1); $mid = [int](($asp[0] + $asp[1]) / 2); $aw = [math]::Max(2, [int](($asp[1] - $asp[0]) * 0.35))
-  $f.ShiftRegion($mid - [int]($aw / 2), $a0 - 1, $aw, $legTop - $a0, $(if ($liftFront) { -$dir } else { $dir }), 0, $false)
+  $f.ShiftRegion($mid - [int]($aw / 2), $a0 - $K, $aw, $legTop - $a0, $(if ($liftFront) { -$dir } else { $dir }), 0, $false)
   $f
 }
 if ($Only -contains 'sprites') {
@@ -243,8 +257,8 @@ if ($Only -contains 'sprites') {
       $b = $boxes[$bi]; $b[0] = [math]::Min($b[0], $c[0]); $b[1] = [math]::Min($b[1], $c[1]); $b[2] = [math]::Max($b[2], $c[0] + $c[2]); $b[3] = [math]::Max($b[3], $c[1] + $c[3])
     }
     $raw = @(); foreach ($b in $boxes) { $raw += , $img.Crop($b[0], $b[1], $b[2] - $b[0], $b[3] - $b[1]) }
-    $scale = $cfg.h / $raw[0].H                     # same factor for all three directions
-    $poses = @(); foreach ($r in $raw) { $o = $r.BoxResize([math]::Max(1, [int][math]::Round($r.W * $scale)), [math]::Max(1, [int][math]::Round($r.H * $scale))); [void]$o.Quantize(24, $true); $poses += , $o }
+    $scale = $cfg.h * $K / $raw[0].H                # same factor for all three directions
+    $poses = @(); foreach ($r in $raw) { $o = $r.BoxResize([math]::Max(1, [int][math]::Round($r.W * $scale)), [math]::Max(1, [int][math]::Round($r.H * $scale))); [void]$o.Quantize(40, $true); $poses += , $o }
     $down = $poses[0]; $side = $poses[1]; $up = $poses[2]
     $closed = $side.CloseLegs([int]($side.H * 0.62))
     $left = $(if ($cfg.side -eq 'left') { $side } else { $side.FlipX() })
@@ -255,8 +269,8 @@ if ($Only -contains 'sprites') {
       @((Side-Step $right $true $true), $right, (Side-Step $right $true $false)),
       @((Front-Step $up $false), $up, (Front-Step $up $true))
     )
-    $cw = ($poses | ForEach-Object { $_.W } | Measure-Object -Maximum).Maximum + 4
-    $chh = ($poses | ForEach-Object { $_.H } | Measure-Object -Maximum).Maximum + 2
+    $cw = ($poses | ForEach-Object { $_.W } | Measure-Object -Maximum).Maximum + 4 * $K
+    $chh = ($poses | ForEach-Object { $_.H } | Measure-Object -Maximum).Maximum + 2 * $K
     $sheet = New-Object Img ($cw * 3), ($chh * 4)
     for ($r = 0; $r -lt 4; $r++) { for ($c = 0; $c -lt 3; $c++) {
         $fr = $rows[$r][$c]

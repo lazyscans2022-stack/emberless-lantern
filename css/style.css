@@ -130,7 +130,11 @@ body { display: flex; align-items: center; justify-content: center; }
 /* ---------- party cards (menu) ---------- */
 .card { display: grid; grid-template-columns: calc(var(--s)*20px) 1fr; gap: 0 calc(var(--s)*5px); align-items: center; padding: calc(var(--s)*2px) 0; border-bottom: 1px solid rgba(201,164,92,.25); }
 .card:last-child { border-bottom: 0; }
-.card canvas { width: calc(var(--s)*20px); height: calc(var(--s)*20px); image-rendering: pixelated; grid-row: span 3; }
+.card canvas, .card img.face { width: calc(var(--s)*20px); height: calc(var(--s)*20px); image-rendering: pixelated; grid-row: span 3; }
+.card img.face { border-radius: calc(var(--s)*1.5px); box-shadow: 0 0 0 calc(var(--s)*0.6px) #7a5228; background: rgba(0,0,0,.15); }
+.status-face { float: right; margin: 0 0 calc(var(--s)*2px) calc(var(--s)*4px); }
+.status-face img.face.big { width: calc(var(--s)*40px); height: calc(var(--s)*40px); image-rendering: pixelated; display: block;
+  border-radius: calc(var(--s)*2px); box-shadow: 0 0 0 calc(var(--s)*0.8px) #7a5228; }
 .bar { height: calc(var(--s)*2.5px); background: #000; border-radius: 99px; overflow: hidden; margin: calc(var(--s)*0.6px) 0 calc(var(--s)*1.2px); }
 .bar > i { display: block; height: 100%; background: linear-gradient(#9ef08f, #3fa851); }
 .bar.mp > i { background: linear-gradient(#9fd2ff, #3d7ad6); }

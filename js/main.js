@@ -4,6 +4,9 @@
   const stage = document.getElementById('stage');
   const canvas = document.getElementById('world');
   const ctx = canvas.getContext('2d');
+  // The canvas holds 2x the game resolution; everything still draws in 320x240 game coordinates.
+  const CD = G.ART.canvasDetail || 1;
+  canvas.width = G.VIEW_W * CD; canvas.height = G.VIEW_H * CD;
 
   function resize() {
     const fit = Math.min(window.innerWidth / G.VIEW_W, window.innerHeight / G.VIEW_H);
@@ -24,6 +27,8 @@
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
     G.battle.update(dt);
+    ctx.setTransform(CD, 0, 0, CD, 0, 0);
+    ctx.imageSmoothingEnabled = false;
     if (G.battle.active) G.battle.render(ctx);
     else { G.world.update(dt); G.world.render(ctx); }
     if (G.S) G.S.time += dt;

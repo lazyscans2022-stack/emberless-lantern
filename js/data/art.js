@@ -30,6 +30,9 @@ G.ART = {
     morvane_hollow: 'assets/enemies/enemy_morvane_hollow.png',
   },
   sprite: (key) => `assets/sprites/${key}_sheet.png`,          // 3x4 walking sheet (tools/process_art.ps1)
+  spriteDetail: 2,     // sheets are drawn at 2x detail ($SPRITE_DETAIL in process_art.ps1)
+  canvasDetail: 2,     // the game canvas is 2x the 320x240 game resolution so that detail shows
+  face: (name) => `assets/portraits_pixel/${name}_face.png`,   // small face crops for menus
   map: (name) => `assets/maps/${name}.png`,
   portrait: (name) => `assets/portraits_pixel/${name}_pixel.png`,   // painted versions: assets/portraits/
   background: (name) => `assets/backgrounds/${name}.png`,
