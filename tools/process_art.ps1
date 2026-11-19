@@ -168,13 +168,14 @@ if ($Only -contains 'portraits') {   # painted portraits (kept as a backup set; 
   }
 }
 # Pixel portraits (used in game): same framing, then snapped to a real pixel grid at game size.
-$PP_H = 120   # game pixels tall (shown above the dialogue box)
+$PP_H = 240   # image pixels tall; shown 120 game px tall above the dialogue box (double detail)
+$PP_COLORS = 72
 if ($Only -contains 'portraits_pixel') {
   foreach ($name in $CAST) {
     $crop = Frame-Portrait "$Src\portraits_pixel\${name}_pixel.png" $name
     $outW = [int]([math]::Round($crop.W * $PP_H / $crop.H))
     $o = $crop.BoxResize($outW, $PP_H)
-    [void]$o.Quantize(40, $true)
+    [void]$o.Quantize($PP_COLORS, $true)
     $o.Save("$Out\portraits_pixel\${name}_pixel.png")
     "pixel port  ${name}_pixel  ${outW}x$PP_H"
   }

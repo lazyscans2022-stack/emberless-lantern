@@ -11,6 +11,10 @@
     stage.style.width = G.VIEW_W * s + 'px';
     stage.style.height = G.VIEW_H * s + 'px';
     document.documentElement.style.setProperty('--s', s);
+    // Portraits are 240 px tall, shown 120 game px tall. Keep hard pixels when that maps to whole screen
+    // pixels; otherwise smooth them slightly so the pixels don't come out uneven.
+    const ratio = (s * 120 * (window.devicePixelRatio || 1)) / 240;
+    document.documentElement.classList.toggle('smooth-portraits', Math.abs(ratio - Math.round(ratio)) > 0.01);
   }
   window.addEventListener('resize', resize);
   resize();

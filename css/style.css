@@ -38,6 +38,7 @@ body { display: flex; align-items: center; justify-content: center; }
 /* large portraits standing on top of the dialogue box (painted art, so smooth scaling) */
 .pbig { position: absolute; bottom: calc(var(--s) * 66px); height: calc(var(--s) * 120px); width: auto; image-rendering: pixelated;
   pointer-events: none; transition: filter .2s, transform .2s; filter: drop-shadow(0 calc(var(--s)*2px) calc(var(--s)*2px) rgba(0,0,0,.5)); }
+.smooth-portraits .pbig { image-rendering: auto; }
 .pbig.left { left: calc(var(--s) * 4px); }
 .pbig.right { right: calc(var(--s) * 4px); }
 .pbig.dim { filter: brightness(.5) saturate(.6) drop-shadow(0 0 0 transparent); transform: translateY(calc(var(--s)*2px)); }
