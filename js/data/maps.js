@@ -118,7 +118,7 @@ G.MAPS.forest = () => ({
     [370, 0, 46, 230], [370, 262, 46, 122],                                         // river (bridge stays open)
     [520, 160, 56, 54], [236, 270, 16, 22], [254, 270, 16, 20],                     // stump, barrel, sign
     [282, 0, 46, 66], [290, 60, 18, 14],                                            // giant mushrooms
-    [80, 150, 120, 62], [48, 146, 30, 76], [200, 150, 26, 74],                      // cottage and fences
+    [80, 150, 120, 50], [84, 200, 36, 14], [154, 200, 36, 14], [48, 146, 30, 76], [200, 150, 26, 74],   // cottage walls, flower boxes, fences
   ],
   dynamic: [{ x: 326, y: 18, w: 44, h: 46, when: () => !G.flag('gloomcap_defeated') }],   // the Gloomcap blocks the path
   fg: [   // pine tops by the road and Mira's thatched roof, traced so the road beside them stays clear
@@ -147,7 +147,7 @@ G.MAPS.forest = () => ({
   triggers: [
     { x: 326, y: 378, w: 44, h: 6, run: (W) => W.changeMap('village', 'north') },
     { x: 326, y: 0, w: 44, h: 6, run: (W) => W.changeMap('ruins', 'south') },
-    { x: 128, y: 206, w: 24, h: 8, run: (W) => W.changeMap('mira_cottage', 'door') },
+    { x: 126, y: 200, w: 26, h: 10, run: (W) => W.changeMap('mira_cottage', 'door') },   // Mira's front door
     { x: 196, y: 222, w: 10, h: 46, run: async () => { if (!G.flag('mira_joined')) await G.runScene('Mira_Cottage'); } },
     { x: 326, y: 72, w: 44, h: 8, run: async (W) => {
         if (G.flag('gloomcap_defeated')) return;
